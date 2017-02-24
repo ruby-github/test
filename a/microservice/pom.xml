@@ -1,0 +1,402 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!--
+  微服务目录结构:
+
+  src
+    - main
+      - assembly
+        - etc
+          - blueprint
+            - microservice
+              - 微服务配置文件
+          - dockerfile
+            - Dockerfile
+        - resource
+          - conf
+            - application.yml
+          - *.sh
+          - *.bat
+      - java
+      - resources
+
+  服务目录结构:
+
+  build
+    blueprint
+      - service
+        - 服务配置文件
+-->
+<project xmlns='http://maven.apache.org/POM/4.0.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd'>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.zte.umebn.parent</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>com.zte.umebn.parent</groupId>
+  <artifactId>microservice</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <build.output>../build/output</build.output>
+
+    <microservice.name>${artifactId}</microservice.name>
+    <microservice.prefix>${service.prefix}</microservice.prefix>
+    <microservice.version>${service.version}</microservice.version>
+
+    <microservice.mainclass/>
+
+    <assembly.home>src/main/assembly</assembly.home>
+
+    <exclude.groupids>
+      ch.qos.logback,
+      com.aerospike,
+      com.fasterxml.jackson,
+      com.google.code,
+      com.google.guava,
+      com.squareup,
+      com.zte.ums.zenap,
+      javax.annotation,
+      javax.el,
+      javax.inject,
+      javax.servlet,
+      javax.ws.rs,
+      io.dropwizard,
+      io.netty,
+      io.swagger,
+      log4j,
+      org.apache.activemq,
+      org.apache.curator,
+      org.apache.geronimo.specs,
+      org.apache.tomcat,
+      org.cometd.java,
+      org.eclipse.jetty,
+      org.glassfish,
+      org.javassist,
+      org.opendaylight,
+      org.reflections,
+      org.xerial.snappy,
+      org.yaml
+    </exclude.groupids>
+
+    <exclude.artifactids>
+      argparse4j,
+      classmate,
+      commons-beanutils,
+      commons-codec,
+      commons-collections,
+      commons-io,
+      commons-lang3,
+      commons-logging,
+      commons-math,
+      commons-pool,
+      hibernate-validator,
+      jboss-logging,
+      jdbi,
+      jdom,
+      joda-time,
+      jul-to-slf4j,
+      slf4j-api,
+      validation-api,
+      xml-apis
+    </exclude.artifactids>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>clean.clean</id>
+            <phase>clean</phase>
+
+            <goals>
+              <goal>clean</goal>
+            </goals>
+
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>${build.output}</directory>
+
+                  <includes>
+                    <include name='*/blueprint/${microservice.prefix}${microservice.name}_microservice_${microservice.version}'/>
+                    <include name='*/${microservice.prefix}${microservice.name}'/>
+                  </includes>
+                </fileset>
+              </filesets>
+
+              <failOnError>false</failOnError>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>${microservice.mainclass}</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>generate-resources</phase>
+
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+
+            <configuration>
+              <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+
+              <resources>
+                <resource>
+                  <directory>src/main/resources</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-resources.assembly.blueprint</id>
+            <phase>generate-resources</phase>
+
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+
+            <configuration>
+              <outputDirectory>${assembly.output}/blueprint/${microservice.prefix}${microservice.name}_microservice_${microservice.version}</outputDirectory>
+
+              <resources>
+                <resource>
+                  <directory>${assembly.home}/etc/blueprint/microservice</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-resources.assembly.dockerfile</id>
+            <phase>generate-resources</phase>
+
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+
+            <configuration>
+              <outputDirectory>${assembly.output}/dockerfile</outputDirectory>
+
+              <resources>
+                <resource>
+                  <directory>${assembly.home}/etc/dockerfile</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-resources.assembly.resource</id>
+            <phase>generate-resources</phase>
+
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+
+            <configuration>
+              <outputDirectory>${assembly.output}/tar</outputDirectory>
+
+              <resources>
+                <resource>
+                  <directory>${assembly.home}/resource</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+
+            <configuration>
+              <outputDirectory>${assembly.output}/tar/dependency</outputDirectory>
+
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+
+              <excludeGroupIds>${exclude.groupids}</excludeGroupIds>
+              <excludeArtifactIds>${exclude.artifactids}</excludeArtifactIds>
+
+              <includeScope>runtime</includeScope>
+              <includeTypes>jar</includeTypes>
+
+              <type>jar</type>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>unpack-dependencies</id>
+            <phase>package</phase>
+
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+
+            <configuration>
+              <outputDirectory>${assembly.output}/tar</outputDirectory>
+
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+
+              <excludes>META-INF\/**,WEB-INF\/**</excludes>
+
+              <includeScope>runtime</includeScope>
+              <includeTypes>war,zip</includeTypes>
+
+              <type>war,zip</type>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>package</id>
+            <phase>package</phase>
+
+            <goals>
+              <goal>run</goal>
+            </goals>
+
+            <configuration>
+              <target name='package.microservice'>
+                <taskdef name='if' classname='ise.antelope.tasks.IfTask'/>
+
+                <if name='project.packaging' value='pom'>
+                  <else>
+                    <copy file='${project.build.directory}/${project.build.finalName}.jar' tofile='${assembly.output}/tar/${microservice.name}.jar'/>
+                  </else>
+                </if>
+              </target>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>install</id>
+            <phase>install</phase>
+
+            <goals>
+              <goal>run</goal>
+            </goals>
+
+            <configuration>
+              <target name='install.microservice'>
+                <taskdef name='if' classname='ise.antelope.tasks.IfTask'/>
+
+                <if name='project.packaging' value='pom'>
+                  <else>
+                    <copy todir='${build.output}/service/blueprint' overwrite='true' failonerror='true'>
+                      <fileset dir='${assembly.output}/blueprint'/>
+                    </copy>
+
+                    <copy todir='${build.output}/service/${microservice.prefix}${microservice.name}' overwrite='true' failonerror='true'>
+                      <fileset dir='${assembly.output}/dockerfile'/>
+                    </copy>
+
+                    <tar destfile='${build.output}/service/${microservice.prefix}${microservice.name}/${microservice.prefix}${microservice.name}-${microservice.version}.tar.gz' longfile='gnu' compression='gzip'>
+                      <tarfileset dir='${assembly.output}/tar'/>
+                    </tar>
+                  </else>
+                </if>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+
+        <dependencies>
+          <dependency>
+            <groupId>org.tigris.antelope</groupId>
+            <artifactId>antelopetasks</artifactId>
+            <version>3.2.10</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>exec.microservice</id>
+
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+
+        <configuration>
+          <executable>java</executable>
+          <workingDirectory>${assembly.output}/tar/${microservice.name}</workingDirectory>
+
+          <arguments>
+            <argument>-jar</argument>
+            <argument>${microservice.name}.jar</argument>
+            <argument>server</argument>
+            <argument>conf/application.yml</argument>
+          </arguments>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>depend</id>
+
+      <properties>
+        <exclude.groupids/>
+        <exclude.artifactids/>
+      </properties>
+    </profile>
+  </profiles>
+</project>

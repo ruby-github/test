@@ -1,0 +1,215 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<project xmlns='http://maven.apache.org/POM/4.0.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd'>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.zte.umebn.parent</groupId>
+    <artifactId>version</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>com.zte.umebn.support.interface.asn1</groupId>
+  <artifactId>asn1-generate</artifactId>
+  <version>${version}</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <source.home>../../source</source.home>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>generate-sources.snacc4j</id>
+            <phase>generate-sources</phase>
+
+            <goals>
+              <goal>run</goal>
+            </goals>
+
+            <configuration>
+              <target name='generate-sources'>
+                <macrodef name='call-snacc4j'>
+                  <element name='snacc4j'/>
+
+                  <sequential>
+                    <exec executable='./snacc4j/snacc4j' failonerror='true' os='Linux'>
+                      <arg line='-mak'/>
+                      <arg line='-P com.zte.asn'/>
+                      <arg line='-u ${source.home}/asn-useful.asn1'/>
+                      <arg line='-d ${project.build.directory}/generate-sources'/>
+
+                      <snacc4j/>
+                    </exec>
+                  </sequential>
+                </macrodef>
+
+                <call-snacc4j>
+                  <snacc4j>
+                    <!-- platform -->
+
+                    <arg line='${source.home}/platform/ClockView.asn1'/>
+                    <arg line='${source.home}/platform/CommandCode.asn1'/>
+                    <arg line='${source.home}/platform/CommandCodeAmend1.asn1'/>
+                    <arg line='${source.home}/platform/CommandCodeIP.asn1'/>
+                    <arg line='${source.home}/platform/CommonQuery.asn1'/>
+                    <arg line='${source.home}/platform/DCNMgr.asn1'/>
+                    <arg line='${source.home}/platform/DataConsistance.asn1'/>
+                    <arg line='${source.home}/platform/EmsMgr.asn1'/>
+                    <arg line='${source.home}/platform/Equipment.asn1'/>
+                    <arg line='${source.home}/platform/EventAttr.asn1'/>
+                    <arg line='${source.home}/platform/FtpModul.asn1'/>
+                    <arg line='${source.home}/platform/Globaldefs.asn1'/>
+                    <arg line='${source.home}/platform/IPNetwork.asn1'/>
+                    <arg line='${source.home}/platform/IPSystemUnit.asn1'/>
+                    <arg line='${source.home}/platform/Iterators.asn1'/>
+                    <arg line='${source.home}/platform/ManagedElement.asn1'/>
+                    <arg line='${source.home}/platform/PolicyModul.asn1'/>
+                    <arg line='${source.home}/platform/PtnSdn.asn1'/>
+                    <arg line='${source.home}/platform/ServiceAbility.asn1'/>
+                    <arg line='${source.home}/platform/TerminationPoint.asn1'/>
+                    <arg line='${source.home}/platform/TopologicalLink.asn1'/>
+                    <arg line='${source.home}/platform/TransmissionParameters.asn1'/>
+                    <arg line='${source.home}/platform/ZeroTouch.asn1'/>
+
+                    <!-- e2e-emf -->
+
+                    <arg line='${source.home}/e2e-emf/ASON.asn1'/>
+                    <arg line='${source.home}/e2e-emf/CommandCode_e2e_emf.asn1'/>
+                    <arg line='${source.home}/e2e-emf/CrossConnection.asn1'/>
+                    <arg line='${source.home}/e2e-emf/ExpandCapacity.asn1'/>
+                    <arg line='${source.home}/e2e-emf/MaintenanceMgr.asn1'/>
+                    <arg line='${source.home}/e2e-emf/MassDataProc.asn1'/>
+                    <arg line='${source.home}/e2e-emf/MstpPubMgr.asn1'/>
+                    <arg line='${source.home}/e2e-emf/OHMgr.asn1'/>
+                    <arg line='${source.home}/e2e-emf/OTNCfg.asn1'/>
+                    <arg line='${source.home}/e2e-emf/ProtectionMgr.asn1'/>
+                    <arg line='${source.home}/e2e-emf/SncE2eEmfAmend1.asn1'/>
+                    <arg line='${source.home}/e2e-emf/SubnetworkConnection.asn1'/>
+
+                    <!-- e2e -->
+
+                    <arg line='${source.home}/e2e/CommandCode_e2e.asn1'/>
+                    <arg line='${source.home}/e2e/E2eAlarmPub.asn1'/>
+                    <arg line='${source.home}/e2e/E2eProtectionSN.asn1'/>
+                    <arg line='${source.home}/e2e/SubnetworkConnectionAmend1.asn1'/>
+                    <arg line='${source.home}/e2e/SubnetworkConnectionAmend2.asn1'/>
+                    <arg line='${source.home}/e2e/SubnetworkConnectionAmend3.asn1'/>
+                    <arg line='${source.home}/e2e/SubnetworkConnectionE2e.asn1'/>
+
+                    <!-- e2e-stn -->
+
+                    <arg line='${source.home}/e2e-stn/CommandCode_stn.asn1'/>
+                    <arg line='${source.home}/e2e-stn/StnBasic.asn1'/>
+                    <arg line='${source.home}/e2e-stn/StnOpr.asn1'/>
+
+                    <!-- stn -->
+
+                    <arg line='${source.home}/stn/MeTerminationPointModule.asn1'/>
+                  </snacc4j>
+                </call-snacc4j>
+
+                <!-- platform -->
+
+                <delete dir='../platform/src'/>
+
+                <move todir='../platform/src/main/java' overwrite='true' failonerror='false'>
+                  <fileset dir='${project.build.directory}/generate-sources/src'>
+                    <include name='com/zte/asn/clockview/**'/>
+                    <include name='com/zte/asn/cmdcodeip/**'/>
+                    <include name='com/zte/asn/cmdcodemodule/**'/>
+                    <include name='com/zte/asn/cmdcodemodule1/**'/>
+                    <include name='com/zte/asn/commonquery/**'/>
+                    <include name='com/zte/asn/dataconsistance/**'/>
+                    <include name='com/zte/asn/dcnmgr/**'/>
+                    <include name='com/zte/asn/emsmgr/**'/>
+                    <include name='com/zte/asn/equipment/**'/>
+                    <include name='com/zte/asn/eventattr/**'/>
+                    <include name='com/zte/asn/ftpmodul/**'/>
+                    <include name='com/zte/asn/globaldefs/**'/>
+                    <include name='com/zte/asn/ipnetwork/**'/>
+                    <include name='com/zte/asn/ipsystemunit/**'/>
+                    <include name='com/zte/asn/iterators/**'/>
+                    <include name='com/zte/asn/managedelement/**'/>
+                    <include name='com/zte/asn/policymodul/**'/>
+                    <include name='com/zte/asn/ptnsdn/**'/>
+                    <include name='com/zte/asn/serviceability/**'/>
+                    <include name='com/zte/asn/terminationpoint/**'/>
+                    <include name='com/zte/asn/topologicallink/**'/>
+                    <include name='com/zte/asn/transmissionparameters/**'/>
+                    <include name='com/zte/asn/zerotouch/**'/>
+                  </fileset>
+                </move>
+
+                <!-- e2e-emf -->
+
+                <delete dir='../e2e-emf/src'/>
+
+                <move todir='../e2e-emf/src/main/java' overwrite='true' failonerror='false'>
+                  <fileset dir='${project.build.directory}/generate-sources/src'>
+                    <include name='com/zte/asn/ason/**'/>
+                    <include name='com/zte/asn/cmdcodee2eemfmodule/**'/>
+                    <include name='com/zte/asn/crossconnection/**'/>
+                    <include name='com/zte/asn/expandcapacity/**'/>
+                    <include name='com/zte/asn/maintenancemgr/**'/>
+                    <include name='com/zte/asn/massdataproc/**'/>
+                    <include name='com/zte/asn/mstppubmgr/**'/>
+                    <include name='com/zte/asn/ohmgr/**'/>
+                    <include name='com/zte/asn/otncfg/**'/>
+                    <include name='com/zte/asn/protectionmgr/**'/>
+                    <include name='com/zte/asn/snce2eemfamend1/**'/>
+                    <include name='com/zte/asn/subnetworkconnection/**'/>
+                  </fileset>
+                </move>
+
+                <!-- e2e -->
+
+                <delete dir='../e2e/src'/>
+
+                <move todir='../e2e/src/main/java' overwrite='true' failonerror='false'>
+                  <fileset dir='${project.build.directory}/generate-sources/src'>
+                    <include name='com/zte/asn/cmdcodee2emodule/**'/>
+                    <include name='com/zte/asn/e2ealarmpub/**'/>
+                    <include name='com/zte/asn/e2eprotectionsn/**'/>
+                    <include name='com/zte/asn/subnetworkconnectionamend1/**'/>
+                    <include name='com/zte/asn/subnetworkconnectionamend2/**'/>
+                    <include name='com/zte/asn/subnetworkconnectionamend3/**'/>
+                    <include name='com/zte/asn/subnetworkconnectione2e/**'/>
+                  </fileset>
+                </move>
+
+                <!-- e2e-stn -->
+
+                <delete dir='../e2e-stn/src'/>
+
+                <move todir='../e2e-stn/src/main/java' overwrite='true' failonerror='false'>
+                  <fileset dir='${project.build.directory}/generate-sources/src'>
+                    <include name='com/zte/asn/cmdcodesptnmodule/**'/>
+                    <include name='com/zte/asn/sptnbasicmodule/**'/>
+                    <include name='com/zte/asn/sptnoprmodule/**'/>
+                  </fileset>
+                </move>
+
+                <!-- stn -->
+
+                <delete dir='../stn/src'/>
+
+                <move todir='../stn/src/main/java' overwrite='true' failonerror='false'>
+                  <fileset dir='${project.build.directory}/generate-sources/src'>
+                    <include name='com/zte/asn/meterminationpointmodule/**'/>
+                  </fileset>
+                </move>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

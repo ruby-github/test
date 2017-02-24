@@ -1,0 +1,250 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<project xmlns='http://maven.apache.org/POM/4.0.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd'>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.zte.umebn.parent</groupId>
+    <artifactId>version</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>com.zte.umebn.parent</groupId>
+  <artifactId>parent_c</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <build.output>../build/output</build.output>
+    <include.deploy>false</include.deploy>
+
+    <compiler.executable>g++</compiler.executable>
+    <linker.executable>g++</linker.executable>
+
+    <linker.args.shared>-shared</linker.args.shared>
+    <linker.secondary.output.extensions/>
+
+    <!-- compiler concurrent: jobs -->
+    <concurrent.number>1</concurrent.number>
+
+    <!-- fast link -->
+    <check.stale.linkage>true</check.stale.linkage>
+
+    <!-- sdk -->
+
+    <sdk>${build.output}/../../sdk</sdk>
+
+    <!-- boost -->
+    <compiler.args.boost>-I${sdk}/boost</compiler.args.boost>
+    <linker.args.boost>-L${sdk}/boost/lib -lboost_date_time -lboost_filesystem -lboost_regex -lboost_system</linker.args.boost>
+
+    <!-- snacc -->
+    <compiler.args.snacc>-DMETA -I${sdk}/snacc/include/c++ -I${sdk}/snacc/include/c++/additional</compiler.args.snacc>
+    <linker.args.snacc>-L${sdk}/snacc/lib -lasn1c++-DMETA</linker.args.snacc>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>clean.clean</id>
+            <phase>clean</phase>
+
+            <goals>
+              <goal>clean</goal>
+            </goals>
+
+            <configuration>
+              <filesets/>
+
+              <failOnError>false</failOnError>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+        <extensions>true</extensions>
+
+        <configuration>
+          <sources>
+            <source>
+              <directory>src/main/cpp</directory>
+
+              <includes>
+                <include>src/main/include</include>
+              </includes>
+            </source>
+
+            <source>
+              <directory>src/main/include</directory>
+              <deployable>${include.deploy}</deployable>
+            </source>
+          </sources>
+
+          <numberOfConcurrentCompilation>${concurrent.number}</numberOfConcurrentCompilation>
+
+          <compilerProvider>generic</compilerProvider>
+          <compilerExecutable>${compiler.executable}</compilerExecutable>
+
+          <linkerProvider>generic</linkerProvider>
+          <linkerExecutable>${linker.executable}</linkerExecutable>
+
+          <checkStaleLinkage>${check.stale.linkage}</checkStaleLinkage>
+          <linkerSecondaryOutputExtensions>${linker.secondary.output.extensions}</linkerSecondaryOutputExtensions>
+
+          <compilerEndOptions>
+            <compilerEndOption>-m64 -ansi -c -ffunction-sections -fvisibility=hidden -fvisibility-inlines-hidden -fPIC -g -O -pipe -pthread -W -Wall -Wpointer-arith -D_GNU_SOURCE -D_REENTRANT -DLINUX -DSTDC_HEADERS</compilerEndOption>
+            <compilerEndOption>${compiler.args.boost}</compilerEndOption>
+            <compilerEndOption>${compiler.args.snacc}</compilerEndOption>
+            <compilerEndOption>${compiler.args.user}</compilerEndOption>
+          </compilerEndOptions>
+
+          <linkerEndOptions>
+            <linkerEndOption>-m64 ${linker.args.shared} -g -ldl -lpthread -lrt -Wl,-z -Wl,defs</linkerEndOption>
+            <linkerEndOption>${linker.args.boost}</linkerEndOption>
+            <linkerEndOption>${linker.args.snacc}</linkerEndOption>
+            <linkerEndOption>${linker.args.user}</linkerEndOption>
+          </linkerEndOptions>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>package.strip</id>
+            <phase>package</phase>
+
+            <goals>
+              <goal>run</goal>
+            </goals>
+
+            <configuration>
+              <target name='package.strip'>
+                <taskdef name='if' classname='ise.antelope.tasks.IfTask'/>
+
+                <if name='project.packaging' value='so'>
+                  <exec executable='objcopy' failonerror='false'>
+                    <arg line='--only-keep-debug ${project.build.directory}/${project.name}.so ${project.build.directory}/${project.name}.so.debuginfo'/>
+                  </exec>
+
+                  <exec executable='strip' failonerror='false'>
+                    <arg line='-g ${project.build.directory}/${project.name}.so'/>
+                  </exec>
+
+                  <exec executable='objcopy' failonerror='false'>
+                    <arg line='--add-gnu-debuglink=${project.build.directory}/${project.name}.so.debuginfo ${project.build.directory}/${project.name}.so'/>
+                  </exec>
+                </if>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+
+        <dependencies>
+          <dependency>
+            <groupId>org.tigris.antelope</groupId>
+            <artifactId>antelopetasks</artifactId>
+            <version>3.2.10</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>exec.cppcheck</id>
+
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+
+        <configuration>
+          <executable>${sdk}/tools/cppcheck/cppcheck</executable>
+
+          <arguments>
+            <argument>--enable=performance,portability,unusedFunction</argument>
+            <argument>--inconclusive</argument>
+            <argument>--xml</argument>
+            <argument>--xml-version=2</argument>
+            <argument>--outputfile=${check.output}/cppcheck-result.xml</argument>
+            <argument>src/main/cpp</argument>
+          </arguments>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>concurrent</id>
+
+      <activation>
+        <property>
+          <name>jobs</name>
+        </property>
+      </activation>
+
+      <properties>
+        <concurrent.number>${jobs}</concurrent.number>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>fastlink</id>
+
+      <activation>
+        <property>
+          <name>fastlink</name>
+        </property>
+      </activation>
+
+      <properties>
+        <check.stale.linkage>${fastlink}</check.stale.linkage>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>ccache</id>
+
+      <properties>
+        <ccache_gcc>ccache_g++</ccache_gcc>
+      </properties>
+
+      <activation>
+        <property>
+          <name>env.USE_CCACHE</name>
+          <value>1</value>
+        </property>
+      </activation>
+    </profile>
+
+    <profile>
+      <id>sdk</id>
+
+      <properties>
+        <sdk>${env.SDK}</sdk>
+      </properties>
+
+      <activation>
+        <property>
+          <name>env.SDK</name>
+        </property>
+      </activation>
+    </profile>
+  </profiles>
+</project>

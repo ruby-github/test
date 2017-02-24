@@ -1,0 +1,158 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<project xmlns='http://maven.apache.org/POM/4.0.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd'>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.zte.umebn.parent</groupId>
+    <artifactId>version</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>com.zte.umebn.parent</groupId>
+  <artifactId>swagger</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <swagger.prefix/>
+    <swagger.yaml>yaml/swagger.yaml</swagger.yaml>
+
+    <swagger.language>jaxrs</swagger.language>
+    <swagger.apipackage>${swagger.prefix}.resource</swagger.apipackage>
+    <swagger.modelpackage>${swagger.prefix}.model</swagger.modelpackage>
+    <swagger.library/>
+
+    <swagger.output>swagger/server</swagger.output>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.squareup.okhttp</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>2.7.5</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>clean.clean</id>
+            <phase>clean</phase>
+
+            <goals>
+              <goal>clean</goal>
+            </goals>
+
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>src</directory>
+                </fileset>
+              </filesets>
+
+              <failOnError>false</failOnError>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>io.swagger</groupId>
+        <artifactId>swagger-codegen-maven-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>swagger.generate-sources</id>
+            <phase>generate-sources</phase>
+
+            <goals>
+              <goal>generate</goal>
+            </goals>
+
+            <configuration>
+              <inputSpec>${basedir}/${swagger.yaml}</inputSpec>
+              <language>${swagger.language}</language>
+
+              <configOptions>
+                <library>${swagger.library}</library>
+                <apiPackage>${swagger.apipackage}</apiPackage>
+                <modelPackage>${swagger.modelpackage}</modelPackage>
+              </configOptions>
+
+              <output>${project.build.directory}/generated-sources/${swagger.output}</output>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>ant.swagger</id>
+            <phase>generate-sources</phase>
+
+            <goals>
+              <goal>run</goal>
+            </goals>
+
+            <configuration>
+              <target name='ant.swagger'>
+                <copy todir='src/main' overwrite='true' failonerror='true'>
+                  <fileset dir='${project.build.directory}/generated-sources'/>
+                </copy>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>client</id>
+
+      <properties>
+        <swagger.language>java</swagger.language>
+        <swagger.library>retrofit2</swagger.library>
+
+        <swagger.output>swagger/client</swagger.output>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>ng</id>
+
+      <properties>
+        <swagger.language>javascript-closure-angular</swagger.language>
+        <swagger.apipackage/>
+        <swagger.modelpackage/>
+        <swagger.library/>
+
+        <swagger.output>swagger/angularjs</swagger.output>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>ng2</id>
+
+      <properties>
+        <swagger.language>typescript-angular2</swagger.language>
+        <swagger.apipackage/>
+        <swagger.modelpackage/>
+        <swagger.library/>
+
+        <swagger.output>swagger/angularjs2</swagger.output>
+      </properties>
+    </profile>
+  </profiles>
+</project>
